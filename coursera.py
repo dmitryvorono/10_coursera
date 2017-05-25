@@ -15,22 +15,27 @@ def get_courses_list(coursera_xml):
     return [e.text for e in coursera_tree_xml.iter('*') if e.text.startswith('http')]
 
 
+def get_html_text(html_tree, tag, attrs):
+    target_element = html_tree.find(tag, attrs)
+    if not target_element is None:
+        return target_element.text
+
+
+def get_html_count_elements(html_tree, tag, attrs):
+    target_elements = html_tree.find_all(tag, attrs)
+    return len(target_elements)
+
+
 def get_course_info(course_url):
     print(course_url)
     course_html = fetch_content(course_url)
     course_html_tree = BeautifulSoup(course_html, 'html.parser')
-    #print(course_html_tree.prettify())
-    course_name = course_html_tree.find('h1', {'class': 'title display-3-text'})
-    print(course_name.text)
-    course_language = course_html_tree.find('div', {'class': 'rc-Language'})
-    print(course_language.text)
-    course_startdate = course_html_tree.find('div', {'class': 'startdate rc-StartDateString caption-text'}).find('span')
-    print(course_startdate.text)
-    course_period = course_html_tree.find_all('div', {'class': 'week'})
-    print(len(course_period))
-    course_rating = course_html_tree.find('div', {'class': 'ratings-text bt3-visible-xs'})
-    if not course_rating is None:
-        print(course_rating.text)
+    return {'course_name': get_html_text(course_html_tree, 'h1', {'class': 'title display-3-text'}),
+            'course_language': get_html_text(course_html_tree, 'div', {'class': 'rc-Language'}),
+            'course_startdate': course_html_tree.find('div', {'class': 'startdate rc-StartDateString caption-text'}).find('span'),
+            'course_period': get_html_count_elements(course_html_tree, 'div', {'class': 'week'}),
+            'course_rating': get_html_text(course_html_tree, 'div', {'class': 'ratings-text bt3-visible-xs'})
+            }
 
 
 def output_courses_info_to_xlsx(filepath):
@@ -42,4 +47,4 @@ if __name__ == '__main__':
     some_xml = fetch_content(coursera_xml_feed)
     url_courses_list = get_courses_list(some_xml)
     #print(url_courses_list)
-    get_course_info(url_courses_list[0])
+    print(get_course_info(url_courses_list[0]))
