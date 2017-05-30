@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 import time
 from openpyxl import Workbook
 import argparse
+import random
 
 
 def fetch_content(url):
@@ -30,9 +31,16 @@ def get_html_count_elements(html_tree, tag, attrs):
     return len(target_elements)
 
 
-def get_courses_info(url_courses_list, max_courses):
-    return [get_course_info(url) for url in url_courses_list[:max_courses]]
+def get_random_courses_info(url_courses_list, count_courses):
+    shuffled_courses_list = make_shuffled_list(url_courses_list)
+    return [get_course_info(url) for url in shuffled_courses_list[:count_courses]]
     
+
+def make_shuffled_list(seq):
+    shuffled_seq = seq[:]
+    random.shuffle(shuffled_seq)
+    return shuffled_seq
+
 
 def get_course_info(course_url):
     course_html = fetch_content(course_url)
@@ -73,4 +81,4 @@ if __name__ == '__main__':
     coursera_xml_feed = 'https://www.coursera.org/sitemap~www~courses.xml'
     coursera_xml_content = fetch_content(coursera_xml_feed)
     url_courses_list = get_courses_list(coursera_xml_content)
-    output_courses_info_to_xlsx(args.output, get_courses_info(url_courses_list, args.count))
+    output_courses_info_to_xlsx(args.output, get_random_courses_info(url_courses_list, args.count))
