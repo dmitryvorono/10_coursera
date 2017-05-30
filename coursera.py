@@ -3,6 +3,7 @@ from lxml import etree
 from bs4 import BeautifulSoup
 import time
 from openpyxl import Workbook
+import argparse
 
 
 def fetch_content(url):
@@ -63,7 +64,13 @@ def output_courses_info_to_xlsx(filepath, courses_info):
 
 
 if __name__ == '__main__':
+    default_count_courses = 20;
+    default_output_filename = 'coursera_courses.xlsx'
+    parser = argparse.ArgumentParser(description='export Cousera courses to excel')
+    parser.add_argument('-c', '--count', help='count courses to export in excel', type=int, default=default_count_courses)
+    parser.add_argument('-o', '--output', help='output filename', type=str, default=default_output_filename)
+    args = parser.parse_args()
     coursera_xml_feed = 'https://www.coursera.org/sitemap~www~courses.xml'
     coursera_xml_content = fetch_content(coursera_xml_feed)
     url_courses_list = get_courses_list(coursera_xml_content)
-    output_courses_info_to_xlsx('qq.xlsx', get_courses_info(url_courses_list, 20))
+    output_courses_info_to_xlsx(args.output, get_courses_info(url_courses_list, args.count))
