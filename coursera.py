@@ -34,7 +34,7 @@ def get_html_count_elements(html_tree, tag, attrs):
 def get_random_courses_info(url_courses_list, count_courses):
     shuffled_courses_list = make_shuffled_list(url_courses_list)
     return [get_course_info(url) for url in shuffled_courses_list[:count_courses]]
-    
+
 
 def make_shuffled_list(seq):
     shuffled_seq = seq[:]
@@ -54,7 +54,7 @@ def get_course_info(course_url):
 
 
 def xls_set_head(worksheet, head_names):
-    for row in worksheet.iter_rows(min_row = 1, max_col=len(head_names)+1, max_row = 1):
+    for row in worksheet.iter_rows(min_row=1, max_col=len(head_names) + 1, max_row=1):
         for name, cell in zip(head_names, row):
             cell.value = name
 
@@ -65,14 +65,14 @@ def output_courses_info_to_xlsx(filepath, courses_info):
     worksheet.title = 'Coursera'
     head_names = courses_info[0].keys()
     xls_set_head(worksheet, head_names)
-    for row, course_info in zip(worksheet.iter_rows(min_row = 2, max_col=len(head_names)+1, max_row = len(courses_info)+1), courses_info):
+    for row, course_info in zip(worksheet.iter_rows(min_row=2, max_col=len(head_names)+1, max_row=len(courses_info)+1), courses_info):
         for name, cell in zip(head_names, row):
             cell.value = course_info[name]
     wb.save(filepath)
 
 
 if __name__ == '__main__':
-    default_count_courses = 20;
+    default_count_courses = 20
     default_output_filename = 'coursera_courses.xlsx'
     parser = argparse.ArgumentParser(description='export Cousera courses to excel')
     parser.add_argument('-c', '--count', help='count courses to export in excel', type=int, default=default_count_courses)
