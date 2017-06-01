@@ -32,14 +32,7 @@ def get_html_count_elements(html_tree, tag, attrs):
 
 
 def get_random_courses_info(url_courses_list, count_courses):
-    shuffled_courses_list = make_shuffled_list(url_courses_list)
-    return [get_course_info(url) for url in shuffled_courses_list[:count_courses]]
-
-
-def make_shuffled_list(seq):
-    shuffled_seq = seq[:]
-    random.shuffle(shuffled_seq)
-    return shuffled_seq
+    return [get_course_info(url) for url in random.sample(url_courses_list, count_courses)]
 
 
 def get_course_info(course_url):
