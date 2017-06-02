@@ -27,9 +27,12 @@ usage: coursera.py [-h] [-c COUNT] [-o OUTPUT]
 export Cousera courses to excel
 
 optional arguments:
+
   -h, --help            show this help message and exit
+
   -c COUNT, --count COUNT
                         count courses to export in excel
+
   -o OUTPUT, --output OUTPUT
                         output filename
 
