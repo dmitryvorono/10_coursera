@@ -8,8 +8,6 @@ import random
 
 
 def fetch_content(url):
-    time.sleep(1)
-    print('fetch: {0}'.format(url))
     request = requests.get(url)
     if request.status_code == requests.codes.ok:
         return request.content
@@ -31,12 +29,7 @@ def get_html_count_elements(html_tree, tag, attrs):
     return len(target_elements)
 
 
-def get_random_courses_info(url_courses_list, count_courses):
-    return [get_course_info(url) for url in random.sample(url_courses_list, count_courses)]
-
-
-def get_course_info(course_url):
-    course_html = fetch_content(course_url)
+def parse_course(course_html):
     course_html_tree = BeautifulSoup(course_html, 'html.parser')
     return {'Name': get_html_text(course_html_tree, 'h1', {'class': 'title display-3-text'}),
             'Language': get_html_text(course_html_tree, 'div', {'class': 'rc-Language'}),
@@ -46,32 +39,50 @@ def get_course_info(course_url):
             }
 
 
+def get_course_info(course_url):
+    course_html = fetch_content(course_url)
+    return(parse_course(course_html))
+
+
 def xls_set_head(worksheet, head_names):
     for row in worksheet.iter_rows(min_row=1, max_col=len(head_names) + 1, max_row=1):
         for name, cell in zip(head_names, row):
             cell.value = name
 
 
+def format_worksheet(worksheet, title, head_names):
+    worksheet.title = title
+    xls_set_head(worksheet, head_names)
+
+
 def output_courses_info_to_xlsx(filepath, courses_info):
     wb = Workbook()
     worksheet = wb.active
-    worksheet.title = 'Coursera'
-    head_names = courses_info[0].keys()
-    xls_set_head(worksheet, head_names)
-    for row, course_info in zip(worksheet.iter_rows(min_row=2, max_col=len(head_names)+1, max_row=len(courses_info)+1), courses_info):
-        for name, cell in zip(head_names, row):
+    course_keys = courses_info[0].keys()
+    format_worksheet(worksheet, 'Coursera', course_keys)
+    for row, course_info in zip(worksheet.iter_rows(min_row=2, max_col=len(course_keys)+1, max_row=len(courses_info)+1), courses_info):
+        for name, cell in zip(course_keys, row):
             cell.value = course_info[name]
     wb.save(filepath)
 
 
-if __name__ == '__main__':
+def get_command_line_arguments():
     default_count_courses = 20
     default_output_filename = 'coursera_courses.xlsx'
     parser = argparse.ArgumentParser(description='export Cousera courses to excel')
     parser.add_argument('-c', '--count', help='count courses to export in excel', type=int, default=default_count_courses)
     parser.add_argument('-o', '--output', help='output filename', type=str, default=default_output_filename)
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+if __name__ == '__main__':
+    args = get_command_line_arguments()
     coursera_xml_feed = 'https://www.coursera.org/sitemap~www~courses.xml'
     coursera_xml_content = fetch_content(coursera_xml_feed)
-    url_courses_list = get_courses_list(coursera_xml_content)
-    output_courses_info_to_xlsx(args.output, get_random_courses_info(url_courses_list, args.count))
+    random_courses_list = random.sample(get_courses_list(coursera_xml_content), args.count)
+    courses_info = []
+    for course_url in random_courses_list:
+        print('fetch: {0}'.format(course_url))
+        courses_info.append(get_course_info(course_url))
+        time.sleep(1)
+    output_courses_info_to_xlsx(args.output, courses_info)
