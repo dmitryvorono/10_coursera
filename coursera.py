@@ -55,7 +55,7 @@ def format_worksheet(worksheet, title, head_names):
     xls_set_head(worksheet, head_names)
 
 
-def output_courses_info_to_xlsx(filepath, courses_info):
+def output_courses_info_to_xlsx(courses_info):
     wb = Workbook()
     worksheet = wb.active
     course_keys = courses_info[0].keys()
@@ -63,7 +63,7 @@ def output_courses_info_to_xlsx(filepath, courses_info):
     for row, course_info in zip(worksheet.iter_rows(min_row=2, max_col=len(course_keys)+1, max_row=len(courses_info)+1), courses_info):
         for name, cell in zip(course_keys, row):
             cell.value = course_info[name]
-    wb.save(filepath)
+    return wb
 
 
 def get_command_line_arguments():
@@ -85,4 +85,5 @@ if __name__ == '__main__':
         print('fetch: {0}'.format(course_url))
         courses_info.append(get_course_info(course_url))
         time.sleep(1)
-    output_courses_info_to_xlsx(args.output, courses_info)
+    excel_workbook = output_courses_info_to_xlsx(courses_info)
+    excel_workbook.save(args.output)
